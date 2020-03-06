@@ -64,6 +64,15 @@ def test_return_parse_result():
 
     r = _Return([List[int]], None)
     assert r.parse_result([1, 2]) == (([1, 2],), {})
+    with pytest.raises(RuntimeError) as e:
+        r.parse_result([1, "a"])
+    assert str(e.value) == "Values error: '[1, 'a']' is not of type typing.List[int]."
+
+    r = _Return([Optional[str]])
+    assert r.parse_result("hello") == (("hello",), {})
+    with pytest.raises(RuntimeError) as e:
+        r.parse_result(1)
+    assert str(e.value) == "Values error: '1' is not of type typing.Union[str, NoneType]."
 
     r = _Return([Optional[int]], _Meta(x=bool))
     assert r.parse_result((1, {"x": False})) == ((1,), {"x": False})
@@ -72,6 +81,9 @@ def test_return_parse_result():
     r = _Return([Union[str, int, float]], _Meta(x=Callable))
     assert r.parse_result((1.0, {"x": Pipeline})) == ((1.0,), {'x': Pipeline})
     assert r.parse_result(('Wow', {"x": Pipeline})) == (('Wow',), {'x': Pipeline})
+    with pytest.raises(RuntimeError) as e:
+        r.parse_result(([1], {"x": Pipeline}))
+    assert str(e.value) == "Values error: '[1]' is not of type typing.Union[str, int, float]."
 
     r = _Return([Callable], _Meta(x=int))
     assert r.parse_result((Pipeline, {"x": 1})) == ((Pipeline,), {'x': 1})

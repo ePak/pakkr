@@ -69,15 +69,7 @@ class _Return(_ReturnType):
                 sub_args, sub_meta = _type.parse_result(item)
                 args += sub_args
                 meta.update(sub_meta)
-            elif hasattr(_type, '__origin__') and _type.__origin__:
-                if (
-                        _type.__origin__ == Union and
-                        isinstance(item, _type.__args__)
-                ):
-                    args.append(item)
-                elif isinstance(item, _type.__origin__):
-                    args.append(item)
-            elif isinstance(item, _type):
+            elif self._instance_of(item, _type):
                 args.append(item)
             else:
                 wrong_type_args.append((item, _type))

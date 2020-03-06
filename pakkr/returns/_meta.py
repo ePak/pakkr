@@ -51,16 +51,7 @@ class _Meta(dict, _ReturnType):
             msg += "Unexpected meta keys {}.".format(extra) if extra else ""
             raise RuntimeError(msg)
 
-        def _check_t(k, t):
-            if hasattr(t, '__origin__') and t.__origin__:
-                if t.__origin__ == typing.Union:
-                    return isinstance(result[k], t.__args__)
-                else:
-                    return isinstance(result[k], t.__origin__)  # i.e. List[int]
-            else:
-                return isinstance(result[k], t)
-
-        wrong_types = [(k, t, type(result[k])) for k, t in self.items() if not _check_t(k, t)]
+        wrong_types = [(k, t, type(result[k])) for k, t in self.items() if not self._instance_of(result[k], t)]
 
         if wrong_types:
             template = "key '{}' should be type {} but {} was returned"
